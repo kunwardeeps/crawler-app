@@ -1,10 +1,13 @@
 package com.example.crawlerapp.ui;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +23,18 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MonitorAdapter adapter;
+    private EditText selectorInputForResult;
+    private EditText urlInputForResult;
+    private final ActivityResultLauncher<Intent> selectorPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == RESULT_OK && selectorInputForResult != null) {
+            Intent data = result.getData();
+            if (data != null) {
+                String selector = data.getStringExtra(SelectorPickerActivity.EXTRA_SELECTOR);
+                if (selector != null) selectorInputForResult.setText(selector);
+            }
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +98,20 @@ public class MainActivity extends AppCompatActivity {
         EditText freqInput = dialogView.findViewById(R.id.inputFrequency);
         EditText usernameInput = dialogView.findViewById(R.id.inputUsername);
         EditText passwordInput = dialogView.findViewById(R.id.inputPassword);
+        Button pickSelectorBtn = dialogView.findViewById(R.id.btnPickSelector);
+        pickSelectorBtn.setOnClickListener(v -> {
+            String url = urlInput.getText().toString();
+            if (url.isEmpty()) {
+                urlInput.setError("Enter URL first");
+                urlInput.requestFocus();
+                return;
+            }
+            selectorInputForResult = selectorInput;
+            urlInputForResult = urlInput;
+            Intent intent = new Intent(this, SelectorPickerActivity.class);
+            intent.putExtra(SelectorPickerActivity.EXTRA_URL, url);
+            selectorPickerLauncher.launch(intent);
+        });
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Add Monitor")
                 .setView(dialogView)
@@ -164,12 +193,26 @@ public class MainActivity extends AppCompatActivity {
         EditText freqInput = dialogView.findViewById(R.id.inputFrequency);
         EditText usernameInput = dialogView.findViewById(R.id.inputUsername);
         EditText passwordInput = dialogView.findViewById(R.id.inputPassword);
+        Button pickSelectorBtn = dialogView.findViewById(R.id.btnPickSelector);
         nameInput.setText(config.getName());
         urlInput.setText(config.getUrl());
         selectorInput.setText(config.getSelector());
         freqInput.setText(String.valueOf(config.getFrequencyMinutes()));
         usernameInput.setText(config.getUsername());
         passwordInput.setText(config.getPassword());
+        pickSelectorBtn.setOnClickListener(v -> {
+            String url = urlInput.getText().toString();
+            if (url.isEmpty()) {
+                urlInput.setError("Enter URL first");
+                urlInput.requestFocus();
+                return;
+            }
+            selectorInputForResult = selectorInput;
+            urlInputForResult = urlInput;
+            Intent intent = new Intent(this, SelectorPickerActivity.class);
+            intent.putExtra(SelectorPickerActivity.EXTRA_URL, url);
+            selectorPickerLauncher.launch(intent);
+        });
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Edit Monitor")
                 .setView(dialogView)

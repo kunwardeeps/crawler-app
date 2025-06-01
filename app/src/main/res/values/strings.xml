@@ -4,4 +4,11 @@
     <string name="last_checked_placeholder">Last checked: -</string>
     <string name="edit_monitor">Edit monitor</string>
     <string name="delete_monitor">Delete monitor</string>
+    <string name="hint_css_selector">CSS Selector (e.g. #price)</string>
+    <string name="pick_selector">Pick Selector</string>
+    <string name="hint_monitor_name">Monitor Name</string>
+    <string name="hint_website_url">Website URL</string>
+    <string name="hint_frequency">Frequency (minutes)</string>
+    <string name="hint_username">Username (optional)</string>
+    <string name="hint_password">Password (optional)</string>
 </resources>
