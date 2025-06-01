@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Website Change Monitor</string>
     <string name="add_monitor">Add Monitor</string>
+    <string name="last_checked_placeholder">Last checked: -</string>
+    <string name="edit_monitor">Edit monitor</string>
+    <string name="delete_monitor">Delete monitor</string>
 </resources>

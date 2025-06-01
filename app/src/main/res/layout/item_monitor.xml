@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -23,4 +24,50 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start|center_vertical"
+        android:paddingTop="4dp">
+
+        <TextView
+            android:id="@+id/monitorLastChecked"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:textColor="#222222"
+            android:text="@string/last_checked_placeholder" />
+
+        <ImageButton
+            android:id="@+id/monitorEditButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="@string/edit_monitor"
+            app:tint="#222222"
+            android:background="@android:color/transparent"
+            android:focusable="false"
+            android:clickable="true"
+            android:padding="8dp" />
+
+        <ImageButton
+            android:id="@+id/monitorDeleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:src="@drawable/ic_delete"
+            android:contentDescription="@string/delete_monitor"
+            app:tint="#B00020"
+            android:background="@android:color/transparent"
+            android:focusable="false"
+            android:clickable="true"
+            android:padding="8dp" />
+    </LinearLayout>
+
 </LinearLayout>
