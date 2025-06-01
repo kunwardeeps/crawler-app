@@ -18,6 +18,18 @@ public class NotificationUtil {
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                // Permission is not granted, request it
+                if (context instanceof android.app.Activity) {
+                    ((android.app.Activity) context).requestPermissions(
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                        1001 // You can define a constant for this request code
+                    );
+                }
+                return;
+            }
+        }
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify((int) System.currentTimeMillis(), builder.build());
     }

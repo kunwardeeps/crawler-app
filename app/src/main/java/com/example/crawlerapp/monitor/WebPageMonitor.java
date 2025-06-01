@@ -13,13 +13,15 @@ public class WebPageMonitor implements Monitor {
     @Override
     public MonitorResult check(Context context, MonitorConfig config) {
         try {
-            org.jsoup.nodes.Document doc = org.jsoup.Jsoup.connect(config.getUrl()).get();
-            org.jsoup.select.Elements elements = doc.select(config.getSelector());
+            Document doc = Jsoup.connect(config.getUrl()).get();
+            Elements elements = doc.select(config.getSelector());
             boolean changed = !elements.isEmpty();
             String message = changed ? "Change detected" : "No change";
-            return new com.example.crawlerapp.model.MonitorResult(changed, message, java.util.Collections.singletonList(elements.text()));
-        } catch (java.io.IOException e) {
-            return new com.example.crawlerapp.model.MonitorResult(false, "Error: " + e.getMessage(), java.util.Collections.emptyList());
+            String currentValue = elements.text();
+            // Always output the current value, regardless of change
+            return new MonitorResult(changed, message + ". Current value: " + currentValue, java.util.Collections.singletonList(currentValue));
+        } catch (IOException e) {
+            return new MonitorResult(false, "Error: " + e.getMessage(), java.util.Collections.emptyList());
         }
     }
 }
