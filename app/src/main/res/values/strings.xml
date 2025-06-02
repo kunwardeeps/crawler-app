@@ -11,4 +11,6 @@
     <string name="hint_frequency">Frequency (minutes)</string>
     <string name="hint_username">Username (optional)</string>
     <string name="hint_password">Password (optional)</string>
+    <string name="hint_login_url">Login URL (optional)</string>
+    <string name="login">Login</string>
 </resources>

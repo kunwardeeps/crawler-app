@@ -13,7 +13,18 @@ public class WebPageMonitor implements Monitor {
     @Override
     public MonitorResult check(Context context, MonitorConfig config) {
         try {
-            Document doc = Jsoup.connect(config.getUrl()).get();
+            org.jsoup.Connection connection = Jsoup.connect(config.getUrl());
+            if (config.getCookies() != null && !config.getCookies().isEmpty()) {
+                // Parse cookies string (format: key1=value1; key2=value2)
+                String[] cookiePairs = config.getCookies().split(";");
+                for (String pair : cookiePairs) {
+                    String[] kv = pair.trim().split("=", 2);
+                    if (kv.length == 2) {
+                        connection.cookie(kv[0], kv[1]);
+                    }
+                }
+            }
+            Document doc = connection.get();
             Elements elements = doc.select(config.getSelector());
             boolean changed = !elements.isEmpty();
             String message = changed ? "Change detected" : "No change";

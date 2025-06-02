@@ -20,6 +20,9 @@
         <activity
             android:name=".ui.SelectorPickerActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.LoginWebViewActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

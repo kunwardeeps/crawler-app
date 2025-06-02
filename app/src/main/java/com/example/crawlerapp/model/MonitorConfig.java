@@ -10,8 +10,10 @@ public class MonitorConfig implements Serializable {
     private String selector;
     private int frequencyMinutes;
     private boolean enabled;
+    private String cookies;
+    private String loginUrl;
 
-    public MonitorConfig(String name, String url, String username, String password, String selector, int frequencyMinutes, boolean enabled) {
+    public MonitorConfig(String name, String url, String username, String password, String selector, int frequencyMinutes, boolean enabled, String cookies, String loginUrl) {
         this.name = name;
         this.url = url;
         this.username = username;
@@ -19,6 +21,8 @@ public class MonitorConfig implements Serializable {
         this.selector = selector;
         this.frequencyMinutes = frequencyMinutes;
         this.enabled = enabled;
+        this.cookies = cookies;
+        this.loginUrl = loginUrl;
     }
 
     // Getters and setters
@@ -36,4 +40,8 @@ public class MonitorConfig implements Serializable {
     public void setFrequencyMinutes(int frequencyMinutes) { this.frequencyMinutes = frequencyMinutes; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public String getCookies() { return cookies; }
+    public void setCookies(String cookies) { this.cookies = cookies; }
+    public String getLoginUrl() { return loginUrl; }
+    public void setLoginUrl(String loginUrl) { this.loginUrl = loginUrl; }
 }
