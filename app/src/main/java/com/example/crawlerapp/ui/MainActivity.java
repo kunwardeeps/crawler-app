@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import java.util.concurrent.TimeUnit;
+import androidx.appcompat.widget.SwitchCompat;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
@@ -86,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
                 .show()
             );
             adapter.setOnMonitorEditListener(this::showEditMonitorDialog);
+            adapter.setOnMonitorHistoryListener(config -> showMonitorHistoryDialog(config));
             recyclerView.setAdapter(adapter);
         } catch (Exception e) {
             // Handle error
@@ -103,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
         EditText loginUrlInput = dialogView.findViewById(R.id.inputLoginUrl);
         Button pickSelectorBtn = dialogView.findViewById(R.id.btnPickSelector);
         Button loginWebViewBtn = dialogView.findViewById(R.id.btnLoginWebView);
+        Button pickStartDateTimeBtn = dialogView.findViewById(R.id.btnPickStartDateTime);
+        TextView tvStartDateTime = dialogView.findViewById(R.id.tvStartDateTime);
+        SwitchCompat switchEnabled = dialogView.findViewById(R.id.switchEnabled);
         pickSelectorBtn.setOnClickListener(v -> {
             String url = urlInput.getText().toString();
             if (url.isEmpty()) {
@@ -144,8 +150,10 @@ public class MainActivity extends AppCompatActivity {
                 String username = usernameInput.getText().toString();
                 String password = passwordInput.getText().toString();
                 String loginUrl = loginUrlInput.getText().toString();
+                boolean enabled = switchEnabled.isChecked();
+                long startDT = 0L; // Default to 0 for new
                 try { freq = Integer.parseInt(freqInput.getText().toString()); } catch (Exception ignored) {}
-                MonitorConfig config = new MonitorConfig(name, url, username, password, selector, freq, true, sessionCookies, loginUrl);
+                MonitorConfig config = new MonitorConfig(name, url, username, password, selector, freq, enabled, sessionCookies, loginUrl, startDT);
                 try {
                     MonitorStorage.saveConfig(MainActivity.this, config);
                     loadMonitors();
@@ -162,8 +170,10 @@ public class MainActivity extends AppCompatActivity {
                 String username = usernameInput.getText().toString();
                 String password = passwordInput.getText().toString();
                 String loginUrl = loginUrlInput.getText().toString();
+                boolean enabled = switchEnabled.isChecked();
+                long startDT = 0L;
                 try { freq = Integer.parseInt(freqInput.getText().toString()); } catch (Exception ignored) {}
-                MonitorConfig config = new MonitorConfig(name, url, username, password, selector, freq, true, sessionCookies, loginUrl);
+                MonitorConfig config = new MonitorConfig(name, url, username, password, selector, freq, enabled, sessionCookies, loginUrl, startDT);
                 new Thread(() -> {
                     try {
                         com.example.crawlerapp.monitor.WebPageMonitor monitor = new com.example.crawlerapp.monitor.WebPageMonitor();
@@ -212,6 +222,9 @@ public class MainActivity extends AppCompatActivity {
         EditText loginUrlInput = dialogView.findViewById(R.id.inputLoginUrl);
         Button pickSelectorBtn = dialogView.findViewById(R.id.btnPickSelector);
         Button loginWebViewBtn = dialogView.findViewById(R.id.btnLoginWebView);
+        Button pickStartDateTimeBtn = dialogView.findViewById(R.id.btnPickStartDateTime);
+        TextView tvStartDateTime = dialogView.findViewById(R.id.tvStartDateTime);
+        SwitchCompat switchEnabled = dialogView.findViewById(R.id.switchEnabled);
         nameInput.setText(config.getName());
         urlInput.setText(config.getUrl());
         selectorInput.setText(config.getSelector());
@@ -219,6 +232,17 @@ public class MainActivity extends AppCompatActivity {
         usernameInput.setText(config.getUsername());
         passwordInput.setText(config.getPassword());
         loginUrlInput.setText(config.getLoginUrl());
+        long startDateTime = config.getStartDateTime();
+        if (startDateTime > 0) {
+            java.text.DateFormat df = android.text.format.DateFormat.getDateFormat(this);
+            java.text.DateFormat tf = android.text.format.DateFormat.getTimeFormat(this);
+            java.util.Date date = new java.util.Date(startDateTime);
+            tvStartDateTime.setText(df.format(date) + " " + tf.format(date));
+        } else {
+            tvStartDateTime.setText("Not set");
+        }
+        switchEnabled.setChecked(config.isEnabled());
+        final long[] selectedStartDateTime = {startDateTime};
         pickSelectorBtn.setOnClickListener(v -> {
             String url = urlInput.getText().toString();
             if (url.isEmpty()) {
@@ -242,6 +266,24 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(LoginWebViewActivity.EXTRA_LOGIN_URL, loginUrl);
             loginWebViewLauncher.launch(intent);
         });
+        pickStartDateTimeBtn.setOnClickListener(v -> {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            if (selectedStartDateTime[0] > 0) cal.setTimeInMillis(selectedStartDateTime[0]);
+            new android.app.DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+                cal.set(java.util.Calendar.YEAR, year);
+                cal.set(java.util.Calendar.MONTH, month);
+                cal.set(java.util.Calendar.DAY_OF_MONTH, dayOfMonth);
+                new android.app.TimePickerDialog(this, (timeView, hour, minute) -> {
+                    cal.set(java.util.Calendar.HOUR_OF_DAY, hour);
+                    cal.set(java.util.Calendar.MINUTE, minute);
+                    cal.set(java.util.Calendar.SECOND, 0);
+                    selectedStartDateTime[0] = cal.getTimeInMillis();
+                    java.text.DateFormat df = android.text.format.DateFormat.getDateFormat(this);
+                    java.text.DateFormat tf = android.text.format.DateFormat.getTimeFormat(this);
+                    tvStartDateTime.setText(df.format(cal.getTime()) + " " + tf.format(cal.getTime()));
+                }, cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE), true).show();
+            }, cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH), cal.get(java.util.Calendar.DAY_OF_MONTH)).show();
+        });
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Edit Monitor")
                 .setView(dialogView)
@@ -260,8 +302,10 @@ public class MainActivity extends AppCompatActivity {
                 String username = usernameInput.getText().toString();
                 String password = passwordInput.getText().toString();
                 String loginUrl = loginUrlInput.getText().toString();
+                boolean enabled = switchEnabled.isChecked();
+                long startDT = selectedStartDateTime[0];
                 try { freq = Integer.parseInt(freqInput.getText().toString()); } catch (Exception ignored) {}
-                MonitorConfig newConfig = new MonitorConfig(name, url, username, password, selector, freq, true, sessionCookies, loginUrl);
+                MonitorConfig newConfig = new MonitorConfig(name, url, username, password, selector, freq, enabled, sessionCookies, loginUrl, startDT);
                 try {
                     MonitorStorage.deleteConfig(MainActivity.this, config.getName());
                     MonitorStorage.saveConfig(MainActivity.this, newConfig);
@@ -279,8 +323,10 @@ public class MainActivity extends AppCompatActivity {
                 String username = usernameInput.getText().toString();
                 String password = passwordInput.getText().toString();
                 String loginUrl = loginUrlInput.getText().toString();
+                boolean enabled = switchEnabled.isChecked();
+                long startDT = selectedStartDateTime[0];
                 try { freq = Integer.parseInt(freqInput.getText().toString()); } catch (Exception ignored) {}
-                MonitorConfig testConfig = new MonitorConfig(name, url, username, password, selector, freq, true, sessionCookies, loginUrl);
+                MonitorConfig testConfig = new MonitorConfig(name, url, username, password, selector, freq, enabled, sessionCookies, loginUrl, startDT);
                 new Thread(() -> {
                     try {
                         com.example.crawlerapp.monitor.WebPageMonitor monitor = new com.example.crawlerapp.monitor.WebPageMonitor();
@@ -316,5 +362,39 @@ public class MainActivity extends AppCompatActivity {
             });
         });
         dialog.show();
+    }
+
+    private void showMonitorHistoryDialog(MonitorConfig config) {
+        // Fetch history entries for this monitor
+        new Thread(() -> {
+            List<com.example.crawlerapp.model.MonitorHistoryEntry> historyEntries = null;
+            try {
+                com.example.crawlerapp.model.AppDatabase db = com.example.crawlerapp.model.AppDatabase.getInstance(this);
+                historyEntries = db.monitorHistoryDao().getHistoryForMonitor(config.getName());
+            } catch (Exception e) {
+                // Handle error
+            }
+            List<com.example.crawlerapp.model.MonitorHistoryEntry> finalHistoryEntries = historyEntries;
+            runOnUiThread(() -> {
+                StringBuilder sb = new StringBuilder();
+                if (finalHistoryEntries != null && !finalHistoryEntries.isEmpty()) {
+                    java.text.DateFormat df = android.text.format.DateFormat.getDateFormat(this);
+                    java.text.DateFormat tf = android.text.format.DateFormat.getTimeFormat(this);
+                    for (com.example.crawlerapp.model.MonitorHistoryEntry entry : finalHistoryEntries) {
+                        java.util.Date date = new java.util.Date(entry.timestamp);
+                        sb.append(df.format(date)).append(" ").append(tf.format(date)).append(": ");
+                        sb.append(entry.value != null ? entry.value : "-");
+                        sb.append("\n\n");
+                    }
+                } else {
+                    sb.append("No history found.");
+                }
+                new AlertDialog.Builder(this)
+                    .setTitle("History for " + config.getName())
+                    .setMessage(sb.toString())
+                    .setPositiveButton("OK", null)
+                    .show();
+            });
+        }).start();
     }
 }

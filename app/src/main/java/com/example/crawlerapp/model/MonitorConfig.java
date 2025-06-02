@@ -12,8 +12,9 @@ public class MonitorConfig implements Serializable {
     private boolean enabled;
     private String cookies;
     private String loginUrl;
+    private long startDateTime; // Epoch millis for start date/time
 
-    public MonitorConfig(String name, String url, String username, String password, String selector, int frequencyMinutes, boolean enabled, String cookies, String loginUrl) {
+    public MonitorConfig(String name, String url, String username, String password, String selector, int frequencyMinutes, boolean enabled, String cookies, String loginUrl, long startDateTime) {
         this.name = name;
         this.url = url;
         this.username = username;
@@ -23,6 +24,7 @@ public class MonitorConfig implements Serializable {
         this.enabled = enabled;
         this.cookies = cookies;
         this.loginUrl = loginUrl;
+        this.startDateTime = startDateTime;
     }
 
     // Getters and setters
@@ -44,4 +46,6 @@ public class MonitorConfig implements Serializable {
     public void setCookies(String cookies) { this.cookies = cookies; }
     public String getLoginUrl() { return loginUrl; }
     public void setLoginUrl(String loginUrl) { this.loginUrl = loginUrl; }
+    public long getStartDateTime() { return startDateTime; }
+    public void setStartDateTime(long startDateTime) { this.startDateTime = startDateTime; }
 }
